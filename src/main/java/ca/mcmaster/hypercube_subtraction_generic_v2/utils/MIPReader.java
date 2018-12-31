@@ -28,6 +28,72 @@ import java.util.Map;
  */
 public class MIPReader {
     
+    //get all constraints as lower bounds
+    //Improved method that does not use iterators
+    public static List<LowerBoundConstraint> getConstraintsFast(IloCplex cplex) throws IloException{
+        
+        IloLPMatrix lpMatrix = (IloLPMatrix)cplex.LPMatrixIterator().next();
+        
+        final int numConstraints = lpMatrix.getNrows();
+        final int numVariables = lpMatrix.getNcols();
+        
+        List<LowerBoundConstraint> result = new ArrayList<LowerBoundConstraint>( );
+        
+        
+        int[][] ind = new int[ numConstraints][];
+        double[][] val = new double[ numConstraints][];
+        
+        double[] lb = new double[numConstraints] ;
+        double[] ub = new double[numConstraints] ;
+        
+        lpMatrix.getRows(ZERO,   numConstraints, lb, ub, ind, val);
+        
+        //build up each constraint 
+        for (int index=ZERO; index < numConstraints ; index ++ ){
+            
+            //System.out.println(index);//k
+                       
+            boolean isUpperBound = Math.abs(ub[index])< BILLION ;
+            boolean isLowerBound = Math.abs(lb[index])<BILLION ;
+            boolean isEquality = ub[index]==lb[index];
+            
+            if (isEquality)  {
+                LowerBoundConstraint lbcUP =new LowerBoundConstraint();
+                LowerBoundConstraint lbcDOWN =new LowerBoundConstraint();
+                 
+                lbcUP .lowerBound= lb[index];
+                lbcDOWN.lowerBound=-ub[index]; //ub portion
+                
+                for (  int varIndex = ZERO;varIndex< ind[index].length;   varIndex ++ ){
+                    String var = lpMatrix.getNumVar(ind[index][varIndex]).getName() ;
+                    Double coeff = val[index][varIndex];
+                    lbcUP.add(var,  coeff) ;
+                    lbcDOWN.add(var, -coeff);
+                }
+                
+                
+                result.add(lbcUP) ;
+                //System.out.println(lbcUP.printMe());//k
+                result.add(lbcDOWN) ;
+                //System.out.println(lbcDOWN.printMe());//k
+            }else {
+                LowerBoundConstraint lbc =new LowerBoundConstraint();
+                lbc.lowerBound=  (isUpperBound && ! isLowerBound )? -ub[index] : lb[index];
+                for (  int varIndex = ZERO;varIndex< ind[index].length;   varIndex ++ ){
+                    String var = lpMatrix.getNumVar(ind[index][varIndex]).getName() ;
+                    Double coeff = val[index][varIndex];
+                    lbc.add(var, (isUpperBound && ! isLowerBound )? -coeff: coeff) ;
+                }
+                result.add(lbc) ;
+                //System.out.println(lbc.printMe());//k
+            }
+            
+        }
+ 
+        return result;
+        
+    }
+    
     
     //get all constraints as lower bounds
     public static List<LowerBoundConstraint> getConstraints(IloCplex cplex) throws IloException{
@@ -69,7 +135,8 @@ public class MIPReader {
                 //add it to our list of constraints
                 result.add(lbc);
                 
-                if (result.size()%HUNDRED ==ZERO) System.out.println(result.size());
+                //System.out.println(lbc.printMe());
+                //if (result.size()%HUNDRED ==ZERO) System.out.println(result.size());
                 //logger.debug(lbc);
                 
             }    else     if (isEquality) {
@@ -91,13 +158,15 @@ public class MIPReader {
                                                  constraintExprLB,   rangeConstraint.getLB() ) ;
                 //add it to our list of constraints
                 result.add(lbc);  
+                 
+                
                 //logger.debug(lbc);
                 //second constraint which is UB
                 lbc  = new LowerBoundConstraint (/*rangeConstraint.getName()+NAME_FOR_EQUALITY_CONSTRAINT_UPPER_BOUND_PORTION,*/
                                                  constraintExprUB,  - rangeConstraint.getUB() ) ;
                 //add it to our list of constraints
                 result.add(lbc); 
-                //logger.debug(lbc);
+                 
                           
             } else if (isUpperBound && isLowerBound && !isEquality) {
                 System.err.println("Range constraints not allowed right now - LATER ");

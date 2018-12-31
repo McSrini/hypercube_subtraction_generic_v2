@@ -23,6 +23,18 @@ public class LowerBoundConstraint {
     public double lowerBound;     
     //public String name ;
     
+    public LowerBoundConstraint( ){
+        constraintExpression = new ArrayList<VariableCoefficientTuple>();
+         
+    }
+    
+    public void add (String var, Double coeff) {
+        VariableCoefficientTuple tuple = new VariableCoefficientTuple (var, coeff);
+        constraintExpression.add(tuple);
+    }
+    
+    
+    
     public LowerBoundConstraint( /*String name, */
                                  List<VariableCoefficientTuple>   constraint_Expr ,    
                                  double lowerBound ) {
@@ -35,6 +47,12 @@ public class LowerBoundConstraint {
         
         //this.name= name;
         
+    }
+    
+    //shuffle and then sort
+    public void shuffle() {
+        Collections.shuffle(constraintExpression,  PERF_VARIABILITY_RANDOM_GENERATOR);
+        //if (withSorting)  Collections.sort(constraintExpression );  
     }
     
     public void sort (){

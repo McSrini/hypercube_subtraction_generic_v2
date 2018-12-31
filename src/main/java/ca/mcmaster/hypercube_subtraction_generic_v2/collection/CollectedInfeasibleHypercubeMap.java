@@ -6,6 +6,7 @@
 package ca.mcmaster.hypercube_subtraction_generic_v2.collection;
   
 import static ca.mcmaster.hypercube_subtraction_generic_v2.Constants.*;
+import static ca.mcmaster.hypercube_subtraction_generic_v2.Parameters.CHECK_FOR_DUPLICATES;
 import static ca.mcmaster.hypercube_subtraction_generic_v2.Parameters.MERGE_COLLECTED_HYPERCUBES;
 import ca.mcmaster.hypercube_subtraction_generic_v2.common.HyperCube;
 import java.util.ArrayList;
@@ -34,7 +35,7 @@ public class CollectedInfeasibleHypercubeMap {
         for ( int size =  collectedHypercubesForAConstraint.lastKey(); size >=ZERO; size --){
             if (!collectedHypercubesForAConstraint.containsKey(size)) continue;
             List<HyperCube> newCubes =  collectedHypercubesForAConstraint.get(size);
-            newCubes=removeDuplicates(newCubes, size);
+            if (CHECK_FOR_DUPLICATES) newCubes=removeDuplicates(newCubes, size);
             isMIPInfeasible=addCubesAndCheckInfeasibility(newCubes,size) ;
         }
         return isMIPInfeasible;

@@ -80,7 +80,7 @@ public class Driver {
             System.out.println ("DONE preparing vars. Total is  "+ mapOfAllVariablesInTheModel.size());  
                  
             logger.info ("preparing constraints ... ");
-            mipConstraintList= MIPReader.getConstraints(mip);
+            mipConstraintList= MIPReader.getConstraintsFast(mip);
             logger.info ("finding var frequency in constraints ... ");
             
             //find var frequency in constraints. This is used for sorting the variable order withiin the constraint
@@ -112,29 +112,16 @@ public class Driver {
             //we have read the MIP, now start the actual work !
             
             //collect hypercubes
-            int numConstraintsCollectedFor=ZERO;
-            boolean isMIPInfeasible= false;
-            for (LowerBoundConstraint lbc : mipConstraintList) {
-                //System.out.println("Collected hypercubes for " + lbc.printMe());
-                ConstraintAnchoredCollector collector = new ConstraintAnchoredCollector (lbc);
-                collector.collectInfeasibleHypercubes();
-                
-                if (collector.collectedHypercubeMap.size()>ZERO){
-                    isMIPInfeasible = collectedHypercubeMap .addCubesAndCheckInfeasibility(collector.collectedHypercubeMap );
-                }
+            boolean isMIPInfeasible= runOneRoundOfHypercubeCollection (false) ;
+        
+            int numberOfAdditionalCollectionRounds = ZERO;            
+            for (;numberOfAdditionalCollectionRounds< Parameters.NUMBER_OF_AADITIONAL_HYPERCUBE_COLLECTION_ROUNDS;numberOfAdditionalCollectionRounds++ ){
                 if (isMIPInfeasible) break;
+                logger.info (" Starting additional hypercube collection round "+numberOfAdditionalCollectionRounds) ;
                 
-                //System.out.println("\nCollected cubes");
-                //collector.printCollectedHypercubes();
-                //System.out.println("\nCumulative map ");
-                //collectedHypercubeMap.printCollectedHypercubes(false);
-                
-                numConstraintsCollectedFor++;
-                if (numConstraintsCollectedFor%HUNDRED==ZERO) {
-                    System.out.println("Collected hypercubes for this many constraints "+ 
-                            numConstraintsCollectedFor /*+ "\n just collected "+lbc.name*/);
-                }
+                isMIPInfeasible= runOneRoundOfHypercubeCollection (true) ;
             }
+            
             
             if (isMIPInfeasible) {
                 //no need for branching
@@ -182,6 +169,38 @@ public class Driver {
         
     }
     
+    //collect hypercubes and return isInfeasible 
+    private static boolean runOneRoundOfHypercubeCollection (boolean doShuffle) {
+        boolean isMIPInfeasible= false;
+        int numConstraintsCollectedFor=ZERO;
+        
+        for (LowerBoundConstraint lbc : mipConstraintList) {
+            //System.out.println("Collected hypercubes for " + lbc.printMe());
+            
+            if (doShuffle) lbc.shuffle( );
+            
+            ConstraintAnchoredCollector collector = new ConstraintAnchoredCollector (lbc);
+            collector.collectInfeasibleHypercubes();
+
+
+            if (collector.collectedHypercubeMap.size()>ZERO){
+                isMIPInfeasible = collectedHypercubeMap .addCubesAndCheckInfeasibility(collector.collectedHypercubeMap );
+            }
+            if (isMIPInfeasible) break;
+
+            //System.out.println("\nCollected cubes");
+            //collector.printCollectedHypercubes();
+            //System.out.println("\nCumulative map ");
+            //collectedHypercubeMap.printCollectedHypercubes(false);
+
+            numConstraintsCollectedFor++;
+            if (numConstraintsCollectedFor%(HUNDRED)==ZERO) {
+                System.out.println("Collected hypercubes for this many constraints "+   numConstraintsCollectedFor /*+ "\n just collected "+lbc.name*/);
+            }
+        }
+        
+        return isMIPInfeasible;
+    }
     
     private static  TreeMap<Double, List<HyperCube>> prepare_InfeasibleHypercubeMap_SizeKeyed (){
         TreeMap<Double, List<HyperCube>>   infeasibleHypercubeMap_SizeKeyed
@@ -277,6 +296,10 @@ public class Driver {
         
         logger.info ("LOOKAHEAD_LEVELS "+ LOOKAHEAD_LEVELS) ;
         logger.info ("SORT_THE_CONSTRAINT "+ SORT_THE_CONSTRAINT) ;
+        
+        logger.info ("NUMBER_OF_HYPERCUBE_COLLECTION_ROUNDS "+ NUMBER_OF_AADITIONAL_HYPERCUBE_COLLECTION_ROUNDS) ;
+        
+        logger.info ("CHECK_FOR_DUPLICATES "+ CHECK_FOR_DUPLICATES) ;
         
         
     }

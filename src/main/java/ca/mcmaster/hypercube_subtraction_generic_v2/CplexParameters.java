@@ -13,9 +13,12 @@ public class CplexParameters {
      
    
     
-    public static final int MIP_EMPHASIS=   3; 
+    public static final int MIP_EMPHASIS=   0; 
     public static final int MAX_THREADS= 32;  
     public static final int FILE_STRATEGY= 3;  
+    
+    //leave at 0 unless debugging
+    public static final int NODE_LOG_INTERVAL = 0; 
     
     
     

@@ -96,10 +96,10 @@ public class HypercubeBranchHandler extends IloCplex.BranchCallback{
                     getFilteredHypercubes(nodeData.infeasibleHypercubesMap, thisNodesVarFixings);
             
             
-             
             
             if (filterResult.isNodeInfeasibilityDetected) {
                 logger.warn("Infeasibility detected for node "+ thisNodeID);
+                               
                 prune();                
             } else {
 
@@ -146,6 +146,9 @@ public class HypercubeBranchHandler extends IloCplex.BranchCallback{
                     oneChildData.parentVarFixings= thisNodesVarFixings;
                     oneChildData.infeasibleHypercubesMap=filteredHypercubes;*/
                     NodeId oneChildID = makeBranch( vars[ONE],  bounds[ONE],dirs[ONE],   lpEstimate, oneChildData );
+                    
+                    //logger.warn(" parent and 2 kids "+ thisNodeID + " "+zeroChildID + " "+ oneChildID + " "+branchingVarDecision);
+                     
 
                 }else {
                     //do nothing, take cplex default branching
@@ -205,7 +208,7 @@ public class HypercubeBranchHandler extends IloCplex.BranchCallback{
                        result.isNodeInfeasibilityDetected =(Math.round(entry.getKey()) ==decreaseInSize);
                     }
                     if( result.isNodeInfeasibilityDetected) {
-                        //we have detected node infeasibility before CPLEX                         
+                         
                         break;
                     }
                     
@@ -241,9 +244,9 @@ public class HypercubeBranchHandler extends IloCplex.BranchCallback{
         for (IloNumVar var : Driver.mapOfAllVariablesInTheModel.values()){
             Double upper = getUB(var);
             Double lower = getLB(var);
-            if (  Math.round(upper) ==Math.round(lower)){
+            if (  ZERO == Long.compare(Math.round(upper),Math.round(lower))){
                 //value is false if 0 fixing
-                fixedVars.put(var.getName(), ZERO!=Math.round(getValue(var)));
+                fixedVars.put(var.getName(), ZERO!=   Long.compare( Math.round(getValue(var)), Math.round(ZERO))  );
             }
         } 
         return fixedVars;

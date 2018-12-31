@@ -31,7 +31,6 @@ public class HyperCube {
     //set to true if fliter detected that var is not includd in this hyper cube
     public boolean isFilterResult_simplePassThrough = false;
     
-        
     public HyperCube (Collection<String> zeroFixedvars ,Collection<String> oneFixedvars){
         for (String var: zeroFixedvars){
             zeroFixingsMap.put(var, false);  //value is ignored
@@ -39,6 +38,7 @@ public class HyperCube {
         for (String var: oneFixedvars){
             oneFixingsMap.put(var, true); 
         }
+        
          
     }
     
@@ -58,6 +58,7 @@ public class HyperCube {
                 result  = new HyperCube ( this.zeroFixingsMap.keySet(), newOneFixedVars) ;                      
                 result.isFilterResult_simplePassThrough = false;
                 
+                //System.out.println( "Cube "+this.id + " filtered into "+ result.id);
                 
             } else if (zeroFixingsMap.containsKey(var)){
                 //return null
@@ -77,6 +78,7 @@ public class HyperCube {
                 result  = new HyperCube (newZeroFixedvars,this.oneFixingsMap.keySet()) ;
                 result.isFilterResult_simplePassThrough = false;                
                 
+                //System.out.println( "Cube "+this.id + " filtered into "+ result.id);
                  
             } else if (oneFixingsMap.containsKey(var)){
                 //null
@@ -241,7 +243,7 @@ public class HyperCube {
             }
         }
         
-        
+         
         return result;
     }
     
@@ -249,7 +251,7 @@ public class HyperCube {
         
     //toString() 
     public String printMe () {
-        String result = " ZERO ";
+        String result =   " ZERO  ";
         for (String var:   this.zeroFixingsMap.keySet()){
             result +=var +" ";
         }
@@ -260,7 +262,7 @@ public class HyperCube {
         }
          
         result += " "+ this.isMarkedAsMerged;
-        System.out.println(result) ;
+        //System.out.println(result) ;
         return result ;
     }
 }

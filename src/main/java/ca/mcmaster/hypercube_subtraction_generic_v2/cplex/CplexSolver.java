@@ -57,6 +57,7 @@ public class CplexSolver {
         cplex.setParam(IloCplex.Param.Emphasis.MIP,  MIP_EMPHASIS);
         cplex.setParam( IloCplex.Param.Threads, MAX_THREADS);
         cplex.setParam(IloCplex.Param.MIP.Strategy.File,  FILE_STRATEGY);   
+        cplex.setParam(IloCplex.Param.MIP.Interval, NODE_LOG_INTERVAL);
          
         if (DISABLE_HEURISTICS) cplex.setParam( IloCplex.Param.MIP.Strategy.HeuristicFreq , -ONE);
         if (DISABLE_PROBING) cplex.setParam(IloCplex.Param.MIP.Strategy.Probe, -ONE);
