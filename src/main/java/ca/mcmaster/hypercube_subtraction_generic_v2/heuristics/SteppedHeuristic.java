@@ -41,13 +41,16 @@ public  abstract class SteppedHeuristic extends BaseHeuristic{
             
             List<HyperCube> cubesAtThisLevel = entry.getValue();
             for (HyperCube cube: cubesAtThisLevel){
+                
+                //cube.printMe();
+                
                 for (String var : cube.zeroFixingsMap.keySet()){
                     
                     if (ZERO==levelsExamined){
                         //every free var is a candidate 
                     }else {
                         //ignore vars that are not already candidates
-                        if (!candidateVars.contains(var)) break;
+                        if (!candidateVars.contains(var)) continue;
                     }
                     
                     Integer currentScore =scoreMap_Regular.get(var);
@@ -63,7 +66,7 @@ public  abstract class SteppedHeuristic extends BaseHeuristic{
                         //every free var is a candidate 
                     }else {
                         //ignore vars that are not already candidates
-                        if (!candidateVars.contains(var)) break;
+                        if (!candidateVars.contains(var)) continue;
                     }
                     
                     Integer currentScore =scoreMap_Regular.get(var);
